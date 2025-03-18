@@ -1,0 +1,65 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: latest
+
+- name: Ensure Nginx directory structure exists
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - /etc/nginx/sites-available
+    - /etc/nginx/sites-enabled
+
+- name: Deploy default site configuration
+  template:
+    src: default-site.conf.j2
+    dest: /etc/nginx/sites-available/default
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Nginx
+
+- name: Enable firewall
+  ufw:
+    rule: allow
+    port: "{{ nginx_http_port }}"
+    proto: tcp
+
+- name: Ensure Nginx is running
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+- name: Get Nginx version
+  command: nginx -v
+  register: nginx_version
+  changed_when: false
+  ignore_errors: yes
+
+- name: Create web root directory
+  file:
+    path: /var/www/html
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Deploy custom index.html
+  template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  vars:
+    nginx_version: "{{ nginx_version.stderr | regex_replace('^nginx version: (.*)$', '\\1') }}"

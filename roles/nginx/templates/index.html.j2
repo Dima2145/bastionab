@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to {{ ansible_hostname }}!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+        background-color: #f0f0f0;
+    }
+    .info-box {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+</head>
+<body>
+    <h1>Hello, SysAdmin! 👨💻</h1>
+    <div class="info-box">
+        <h2>Server Information</h2>
+        <p>🖥 Hostname: <strong>{{ ansible_hostname }}</strong></p>
+        <p>🌐 IP Address: <strong>{{ ansible_default_ipv4.address }}</strong></p>
+        <p>🕒 Deployment Time: <strong>{{ ansible_date_time.iso8601 }}</strong></p>
+        <p>📦 Nginx Version: <strong>{{ nginx_version }}</strong></p>
+    </div>
+
+    <script>
+    // Client-side time update
+    function updateTime() {
+        const timeElement = document.getElementById('current-time');
+        const now = new Date();
+        timeElement.textContent = now.toLocaleString();
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+    </script>
+</body>
+</html>
